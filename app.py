@@ -210,7 +210,7 @@ def sure_hesapla():
         
     simdi = datetime.now()
     gecen_sure = simdi - YARIS_BASLANGIC
-    toplam_sure = timedelta(seconds=10) # 1 Saatlik Yarış
+    toplam_sure = timedelta(hours=1) # 1 Saatlik Yarış
     
     kalan = toplam_sure - gecen_sure
     
