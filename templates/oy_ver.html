@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Oy Ver</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #15151e; color: white; text-align: center; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .oy-kutusu { background: white; color: #333; padding: 40px; border-radius: 20px; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 10px solid #e10600; }
+        .pilot-resim { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; object-position: top center; border: 5px solid #e10600; margin-bottom: 20px; }
+        h2 { margin: 0; color: #15151e; }
+        p { color: #666; margin-bottom: 30px; }
+        
+        /* MAİL KUTUSU  */
+        
+        input[type="email"] { 
+            width: 100%; padding: 15px; margin-bottom: 15px; 
+            border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; 
+        }
+        input[type="email"]:focus { border-color: #e10600; outline: none; }
+        
+        .btn-gonder { background-color: #e10600; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.3s; }
+        .btn-gonder:hover { background-color: #b30000; transform: scale(1.02); }
+        .btn-iptal { display: block; margin-top: 15px; color: #999; text-decoration: none; font-size: 0.9em; }
+        .btn-iptal:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="oy-kutusu">
+        <img src="{{ pilot.resim }}" class="pilot-resim">
+        <h2>{{ pilot.isim }}</h2>
+        <p>için oy kullanıyorsunuz.</p>
+
+        <form action="/kaydet" method="post">
+            <input type="hidden" name="pilot" value="{{ pilot.isim }}">
+            
+            <input type="email" name="email" placeholder="E-posta adresiniz (Örn: ali@mail.com)" required>
+            
+            <button type="submit" class="btn-gonder">OYU GÖNDER ✅</button>
+        </form>
+
+        <a href="/" class="btn-iptal">Vazgeç</a>
+    </div>
+
+</body>
+</html>

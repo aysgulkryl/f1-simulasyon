@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sonuç</title>
+    <meta http-equiv="refresh" content="3;url=/"> <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #15151e; color: white; text-align: center; padding-top: 100px; }
+        
+        .mesaj-kutusu { 
+            padding: 30px; 
+            border-radius: 15px; 
+            display: inline-block; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            max-width: 500px;
+        }
+        
+        /* BAŞARILI DURUMU (YEŞİL) */
+        .basarili { background-color: #28a745; border: 2px solid #218838; }
+        
+        /* HATA DURUMU (KIRMIZI) */
+        .hata { background-color: #dc3545; border: 2px solid #c82333; }
+
+        h1 { margin: 0; font-size: 2em; }
+        p { margin-top: 10px; font-size: 1.2em; }
+        small { display: block; margin-top: 20px; opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <div class="mesaj-kutusu {{ durum }}">
+        
+        {% if durum == 'hata' %}
+            <h1>⛔ HATA!</h1>
+        {% else %}
+            <h1>✅ BAŞARILI!</h1>
+        {% endif %}
+        
+        <p>{{ mesaj }}</p>
+    </div>
+
+    <small>3 saniye içinde ana sayfaya yönlendiriliyorsunuz...</small>
+
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Hacettepe GP 2025</title>
+    <style>
+        
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f1f1f1; margin: 0; padding-bottom: 50px; }
+        
+        /* Header*/
+        .header-container { background-color: #15151e; color: white; padding: 30px 0; display: flex; justify-content: center; align-items: center; gap: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border-bottom: 5px solid #e10600; }
+        .baslik-yazi { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .baslik-yazi h1 { margin: 0; font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; color: #e10600; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .baslik-yazi h2 { margin: 5px 0 0 0; font-size: 2.5em; color: white; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; line-height: 1; text-align: center; }
+        .bayrak { font-size: 4em; } 
+
+        /* YARIŞ BİTTİ EKRANI */
+        
+        .sampiyon-konteyner {
+            text-align: center;
+            padding: 50px 20px;
+            background: #15151e; 
+            min-height: 80vh; /* Ekranı kaplasın */
+        }
+        
+        .sampiyon-baslik {
+            font-size: 5em; font-weight: 900; color: #FFD700; /* Altın sarısı */
+            text-transform: uppercase; margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: parla 2s infinite alternate;
+        }
+        
+        .sampiyon-isim-dev {
+            font-size: 6em; font-weight: 900; color: white;
+            margin: 0; text-shadow: 4px 4px 10px black;
+        }
+
+        /* DEV PODYUM ALANI */
+        .dev-podyum-alani {
+            width: 90%; max-width: 1400px; height: 600px; /* Çok daha büyük */
+            margin: 50px auto 0 auto;
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.1)), url('/static/arkaplan.jpeg');
+            background-size: cover; background-position: center;
+            border-radius: 30px; position: relative; display: flex; justify-content: center;
+            border-bottom: 20px solid #FFD700; /* Altın taban */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        
+        /* Dev podyumdaki resimler ve isimler daha büyük */
+        .dev-podyum-alani .podyum-resim { width: 180px; height: 180px; border-width: 8px; }
+        .dev-podyum-alani .podyum-isim { font-size: 1.5em; padding: 10px 30px; }
+        
+        /* Dev podyum pozisyonları (Daha yukarı aldık) */
+        .dev-sira-1 { bottom: 220px; left: 50%; transform: translateX(-50%) scale(1.5); z-index: 3; }
+        .dev-sira-2 { bottom: 120px; left: 20%; z-index: 2; transform: scale(1.2); }
+        .dev-sira-3 { bottom: 80px; right: 20%; z-index: 1; transform: scale(1.1); }
+
+        /*  ARAYÜZ */
+        
+        .kontrol-paneli-wrapper { background-color: #fff; padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .arama-kutusu { display: flex; align-items: center; gap: 10px; }
+        input[type="text"] { padding: 15px; width: 400px; border: 2px solid #ddd; border-radius: 30px; outline: none; font-size: 1.1em; background-color: #f9f9f9; transition: all 0.3s; }
+        input[type="text"]:focus { border-color: #e10600; background-color: #fff; }
+        .btn-ara { background-color: #15151e; color: white; padding: 15px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; font-size: 1em; }
+        
+        .sayac-kutusu { font-size: 1.3em; font-weight: bold; color: #15151e; background: #eee; padding: 10px 25px; border-radius: 10px; border-left: 5px solid #e10600; display: flex; align-items: center; gap: 15px; }
+        .btn-baslat { background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.9em; text-transform: uppercase; transition: 0.3s; }
+        .btn-baslat:hover { background-color: #218838; transform: scale(1.05); }
+
+        .liste-butonlari { text-align: center; margin: 20px 0; }
+        .kart-alani { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; padding: 0 20px; margin-bottom: 40px;}
+        .pilot-karti { background: white; width: 260px; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); text-align: left; transition: transform 0.3s ease; }
+        .pilot-karti:hover { transform: translateY(-10px); }
+        .pilot-karti img { width: 100%; height: 190px; object-fit: cover; object-position: top center; border-bottom: 4px solid #e10600; }
+        .pilot-bilgi { padding: 15px; }
+        .isim-satiri { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .isim-satiri h3 { margin: 0; font-size: 1.1em; color: #15151e; }
+        .numara-etiketi { background: #e10600; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; font-size: 0.9em; }
+        .takim-ismi { color: #666; font-size: 0.9em; font-weight: bold; margin-bottom: 15px; display: block; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .stat-box { display: flex; justify-content: space-between; background: #f8f8f8; padding: 8px; margin-bottom: 5px; border-radius: 5px; font-size: 0.85em; }
+        .stat-value { font-weight: bold; color: #15151e; }
+        .btn-oy-ver { background-color: #e10600; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; margin-top: 15px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.3s; }
+        .btn-oy-ver:hover { background-color: #b30000; }
+        
+        .ana-icerik-konteyner { display: flex; justify-content: space-between; align-items: flex-start; max-width: 1200px; margin: 0 auto; gap: 30px; padding: 0 20px; }
+        .sol-panel { flex: 1; background: white; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; }
+        .tablo-baslik { background: #15151e; color: white; padding: 15px; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .pilot-hucre { display: flex; align-items: center; gap: 15px; }
+        .tablo-resim { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; object-position: top center; border: 2px solid #ddd; flex-shrink: 0; }
+        .pilot-isim-text { font-weight: bold; color: #333; font-size: 1.05em; }
+        .pilot-takim-text { font-size: 0.8em; color: #888; font-weight: normal; margin-top: 2px; }
+
+        /* Normal Podyum (Küçük Olan) */
+        .sag-panel-podyum { 
+            flex: 1.5; height: 500px; 
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.2)), url('/static/arkaplan.jpeg');
+            background-size: cover; background-position: center; border-radius: 20px; position: relative; display: flex; justify-content: center; border-bottom: 15px solid #15151e; box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        .podyum-resim { width: 120px; height: 120px; border-radius: 50%; border: 6px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.5); object-fit: cover; object-position: top center; background: #fff; margin-bottom: 15px; }
+        .podyum-basamak { position: absolute; text-align: center; transition: all 0.5s ease; }
+        .podyum-isim { background: #e10600; color: white; padding: 5px 20px; border-radius: 20px; font-weight: bold; width: fit-content; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.4); font-size: 1.1em; }
+        
+        .sira-1 { bottom: 180px; left: 50%; transform: translateX(-50%) scale(1.3); z-index: 3; }
+        .sira-1 .podyum-resim { border-color: #FFD700; box-shadow: 0 0 20px #FFD700; }
+        .sira-2 { bottom: 100px; left: 15%; z-index: 2; transform: scale(1.0); }
+        .sira-2 .podyum-resim { border-color: #C0C0C0; box-shadow: 0 0 15px #C0C0C0; }
+        .sira-3 { bottom: 60px; right: 15%; z-index: 1; transform: scale(0.9); }
+        .sira-3 .podyum-resim { border-color: #CD7F32; box-shadow: 0 0 15px #CD7F32; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <span class="bayrak">🏁</span>
+        <div class="baslik-yazi">
+            <h1>HACETTEPE GRAND PRIX</h1>
+            <h2>FORMULA 1 YARIŞI</h2>
+        </div>
+        <span class="bayrak">🏁</span>
+    </div>
+
+    {% if "Yarış Bitti" in sure %}
+    
+        <div class="sampiyon-konteyner">
+            <div class="sampiyon-baslik">🏆 2025 ŞAMPİYONU 🏆</div>
+            
+            {% if siralama|length > 0 %}
+                <h1 class="sampiyon-isim-dev">{{ siralama[0].isim }}</h1>
+            {% else %}
+                <h1 class="sampiyon-isim-dev">SONUÇ YOK</h1>
+            {% endif %}
+
+            <div class="dev-podyum-alani">
+                {% for pilot in podyum %}
+                    <div class="podyum-basamak dev-sira-{{ loop.index }}">
+                        <img src="{{ pilot.resim }}" class="podyum-resim">
+                        <div class="podyum-isim">{{ pilot.isim }}</div>
+                        {% if loop.index == 1 %}
+                        <div style="color: #FFD700; font-size: 3em; margin-top: 10px;"></div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class="kontrol-paneli-wrapper">
+            <form action="/" method="get" class="arama-kutusu">
+                <input type="text" name="q" placeholder="Pilot veya takım ara...">
+                <button type="submit" class="btn-ara">🔍 ARA</button>
+            </form>
+
+            <div class="sayac-kutusu">
+                {% if "Başlamadı" in sure %}
+                    <span>{{ sure }}</span>
+                    <form action="/baslat" method="post" style="margin:0;">
+                        <button type="submit" class="btn-baslat">▶️ YARIŞI BAŞLAT</button>
+                    </form>
+                {% else %}
+                    <span>⏳ KALAN SÜRE: {{ sure }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="liste-butonlari">
+            {% if durum == 'kapali' %}
+                <a href="/?liste=acik" class="btn-ara" style="background-color: #e10600;">🏎️ Tüm Pilotları ve İstatistikleri Gör</a>
+            {% else %}
+                <a href="/?liste=kapali" class="btn-ara" style="background-color: #666;">❌ Listeyi Gizle</a>
+                
+                <div class="kart-alani">
+                    {% for pilot in pilotlar %}
+                    <div class="pilot-karti">
+                        <img src="{{ pilot.resim }}" alt="{{ pilot.isim }}">
+                        <div class="pilot-bilgi">
+                            <div class="isim-satiri">
+                                <h3>{{ pilot.isim }}</h3>
+                                <span class="numara-etiketi">#{{ pilot.no if pilot.no else "??" }}</span>
+                            </div>
+                            <span class="takim-ismi">{{ pilot.takim }}</span>
+                            
+                            <div class="stat-box"><span>Ülke:</span> <span class="stat-value">{{ pilot.ulke if pilot.ulke else "-" }}</span></div>
+                            <div class="stat-box"><span>Pol:</span> <span class="stat-value">{{ pilot.pol if pilot.pol else "0" }}</span></div>
+                            <div class="stat-box"><span>Podyum:</span> <span class="stat-value">🥇 {{ pilot.podyum if pilot.podyum else "0" }}</span></div>
+                            <div class="stat-box"><span>Şampiyonluk:</span> <span class="stat-value">🏆 {{ pilot.sampiyonluk if pilot.sampiyonluk else "0" }}</span></div>
+
+                            <a href="{{ url_for('oy_ekrani', pilot_ismi=pilot.isim) }}">
+                                <button class="btn-oy-ver">OY VER</button>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 0 auto; width: 90%; margin-bottom: 30px;">
+
+        <div class="ana-icerik-konteyner">
+            <div class="sol-panel">
+                <h3 class="tablo-baslik">Canlı Oylama Sıralaması</h3>
+                <table>
+                    {% for p in siralama %}
+                    <tr>
+                        <td style="font-weight:bold; width: 40px; text-align:center; font-size:1.2em;">{{ loop.index }}.</td>
+                        <td>
+                            <div class="pilot-hucre">
+                                <img src="{{ p.resim }}" class="tablo-resim">
+                                <div>
+                                    <div class="pilot-isim-text">{{ p.isim }}</div>
+                                    <div class="pilot-takim-text">{{ p.takim }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align:right; font-weight:bold; color:#e10600; font-size:1.1em; padding-right:20px;">{{ p.puan }} Oy</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {% if siralama|length == 0 %}
+                    <tr><td colspan="3" style="text-align:center; padding:20px; color:#999;">Henüz oy kullanılmadı. İlk oyu sen ver!</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+
+            <div class="sag-panel-podyum">
+                {% for pilot in podyum %}
+                    <div class="podyum-basamak sira-{{ loop.index }}">
+                        <img src="{{ pilot.resim }}" class="podyum-resim">
+                        <div class="podyum-isim">{{ pilot.isim }}</div>
+                    </div>
+                {% endfor %}
+                
+                {% if podyum|length == 0 %}
+                    <h2 style="align-self: center; color: #fff; text-shadow: 0 0 10px black;">Yarış Başlıyor...</h2>
+                {% endif %}
+            </div>
+        </div>
+    
+    {% endif %} </body>
+</html>
