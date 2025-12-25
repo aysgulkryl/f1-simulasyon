@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 from datetime import datetime, timedelta
 import requests
@@ -8,8 +8,8 @@ import re
 app = Flask(__name__)
 
 OY_DOSYASI = "votes.txt"
-
 YARIS_BASLANGIC = None 
+YARIS_SURESI_SANIYE = 300 
 
 ULKE_SOZLUGU = {
     "Australian": "Avustralya", "Australia": "Avustralya",
@@ -81,10 +81,9 @@ RESIMLER = {
 def veriyi_temizle(metin, veri_tipi=None):
     if not metin: return "0"
     
-    # Parantezleri ve içindekileri sil (Örn: "33 (2016-)")
-    temiz = re.sub(r'\[.*?\]', '', metin) # Köşeli [1]
-    temiz = re.sub(r'\(.*?\)', '', temiz) # Normal (2024)
-    
+    # Parantezleri ve içindekileri sil (Örn: "(2016-), 33[not 1]")
+    temiz = re.sub(r'\[.*?\]', '', metin) 
+    temiz = re.sub(r'\(.*?\)', '', temiz) 
     temiz = temiz.strip()
     
     # Ülke Çevirisi
@@ -134,29 +133,21 @@ def wikipedia_kaziyici(wiki_url):
 
 def pilotlari_yukle():
     print("\n" + "="*60)
-    print("🌍 WIKIPEDIA (DÜZELTİLMİŞ) VERİ ÇEKİLİYOR...")
+    print(" VERİLER ÇEKİLİYOR)")
     print("="*60)
     
     final_liste = []
     
     for pilot in PILOTLAR_DB:
-        print(f"🔍 İşleniyor: {pilot['isim']}...", end=" ")
+        print(f" İşleniyor: {pilot['isim']}...", end=" ")
         
-        # Web'den çek
         web_verisi = wikipedia_kaziyici(pilot['wiki'])
         
-        # DÜZELTMELER
-        
-        #  Max Verstappen "331" veya "133" gelirse "1" yap
+        # Sadece Verstappen için düzeltme (Numarası 1 olsun diye)
         if pilot['isim'] == "Max Verstappen":
             if len(web_verisi['no']) > 2 or "33" in web_verisi['no']:
                 web_verisi['no'] = "1"
-        
-        #  Ülke çevirisi çalışmadıysa manuel zorla
-        if pilot['isim'] == "Charles Leclerc" and web_verisi['ulke'] == "-":
-             web_verisi['ulke'] = "Monako"
-
-        # Terminale rapor ver
+    
         print(f"-> {web_verisi['ulke']} | No: {web_verisi['no']}")
         
         final_liste.append({
@@ -187,37 +178,42 @@ def siralamayi_hesapla():
                     for p_isim in skor_tablosu.keys():
                         if pilot == p_isim:
                             skor_tablosu[p_isim] += 1
+
     sirali = sorted(skor_tablosu.items(), key=lambda x: x[1], reverse=True)
     resimli_siralama = []
+
     for isim, puan in sirali:
-        bilgi = next((p for p in PILOTLAR if p['isim'] == isim), None)
-        if bilgi:
+        bulunan_bilgi = None 
+        for p in PILOTLAR:           
+            if p['isim'] == isim:   
+                bulunan_bilgi = p    
+                break
+        if bulunan_bilgi:
             resimli_siralama.append({
                 "isim": isim,
                 "puan": puan,
-                "resim": bilgi['resim'],
-                "takim": bilgi['takim']
+                "resim": bulunan_bilgi['resim'],
+                "takim": bulunan_bilgi['takim']
             })
+
     return resimli_siralama
 
-# ZAMANLAYICI 
+# ZAMANLAYICI
 def sure_hesapla():
     global YARIS_BASLANGIC
     
-    # Butona basılmadıysa
     if YARIS_BASLANGIC is None:
         return "Yarış Başlamadı 🔴"
         
     simdi = datetime.now()
     gecen_sure = simdi - YARIS_BASLANGIC
-    toplam_sure = timedelta(hours=1) # 1 Saatlik Yarış
+    toplam_sure = timedelta(seconds=YARIS_SURESI_SANIYE) 
     
     kalan = toplam_sure - gecen_sure
     
     if kalan.total_seconds() <= 0:
         return "Yarış Bitti! 🏁"
     
-    # Süreyi hesapla
     dakika = int(kalan.total_seconds() // 60)
     saniye = int(kalan.total_seconds() % 60)
     return f"{dakika} Dk, {saniye} Sn"
@@ -227,48 +223,54 @@ def ana_sayfa():
     aranan = request.args.get('q', '').lower()
     liste_durumu = request.args.get('liste', 'kapali') 
     gonderilecek = []
+    
     if aranan:
         liste_durumu = 'acik'
         for p in PILOTLAR:
-            if aranan in p['isim'].lower() or aranan in p['takim'].lower():
+            if (aranan in p['isim'].lower() or 
+                aranan in p['takim'].lower() or 
+                aranan in str(p.get('no', '')).lower() or 
+                aranan in p.get('ulke', '').lower()):
+                
                 gonderilecek.append(p)
     else:
         gonderilecek = PILOTLAR
+        
     siralama = siralamayi_hesapla()
     podyum = siralama[:3]
     return render_template('index.html', pilotlar=gonderilecek, siralama=siralama, podyum=podyum, sure=sure_hesapla(), durum=liste_durumu)
 
-# OY EKRANI 
 @app.route('/oy-ekrani/<pilot_ismi>')
 def oy_ekrani(pilot_ismi):
-    # KONTROL 1: Yarış Başladı mı?
     if YARIS_BASLANGIC is None:
         return render_template('sonuc.html', mesaj="⚠️ HATA: Yarış henüz başlamadı! Lütfen önce 'YARIŞI BAŞLAT' butonuna basın.", durum="hata")
     
-    # KONTROL 2: Yarış Bitti mi? (1 Saat = 3600 Saniye)
     simdi = datetime.now()
     gecen_sure = simdi - YARIS_BASLANGIC
-    if gecen_sure.total_seconds() > 3600: 
+    if gecen_sure.total_seconds() > YARIS_SURESI_SANIYE: 
         return render_template('sonuc.html', mesaj="⚠️ HATA: Yarış süresi doldu! Artık oy kullanamazsınız.", durum="hata")
 
-    # Her şey yolundaysa oy ekranını aç
-    secilen = next((p for p in PILOTLAR if p['isim'] == pilot_ismi), None)
+    secilen = None          
+    for p in PILOTLAR:      
+        if p['isim'] == pilot_ismi: 
+            secilen = p    
+            break
     return render_template('oy_ver.html', pilot=secilen)
 
-# OY KAYDETME
+# OY KAYDETME 
 @app.route('/kaydet', methods=['POST'])
 def oy_kaydet():
-    # Kayıt anında da kontrol (Çifte güvenlik)
     if YARIS_BASLANGIC is None:
         return render_template('sonuc.html', mesaj="⚠️ HATA: Yarış başlamadığı için oyunuz geçersiz sayıldı.", durum="hata")
         
     simdi = datetime.now()
     gecen_sure = simdi - YARIS_BASLANGIC
-    if gecen_sure.total_seconds() > 3600:
+    
+    if gecen_sure.total_seconds() > YARIS_SURESI_SANIYE:
         return render_template('sonuc.html', mesaj="⚠️ HATA: Yarış bittiği için oyunuz geçersiz sayıldı.", durum="hata")
 
     secilen_pilot = request.form['pilot']
-    gelen_email = request.form.get('email')
+    gelen_email = request.form.get('email', '').strip()
     
     if not gelen_email or "@" not in gelen_email:
         return render_template('sonuc.html', mesaj="❌ Hata: Geçersiz mail adresi!", durum="hata")
@@ -278,14 +280,69 @@ def oy_kaydet():
         
     return render_template('sonuc.html', mesaj=f"Teşekkürler! {secilen_pilot} için oyunuz kaydedildi.", durum="basarili")
 
-# BAŞLAT BUTONU 
 @app.route('/baslat', methods=['POST'])
 def yarisi_baslat():
     global YARIS_BASLANGIC
-    # Eğer yarış zaten başlamadıysa, şimdi başlat
-    if YARIS_BASLANGIC is None:
-        YARIS_BASLANGIC = datetime.now()
+    
+    if os.path.exists(OY_DOSYASI):
+        eski_siralama = siralamayi_hesapla() # Şu anki puan durumunu al
+        
+        if eski_siralama:
+            tarih = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print("\n" + "="*50)
+            print(f"🏁 TAMAMLANAN YARIŞ RAPORU - {tarih}")
+            print("="*50)
+            for i, p in enumerate(eski_siralama, 1):
+                print(f"{i}. {p['isim']} \t-> {p['puan']} Oy")
+            print("="*50 + "\n")
+
+            sampiyon = eski_siralama[0]['isim'] 
+            
+            fan_sayaci = {} 
+
+            with open(OY_DOSYASI, "r", encoding="utf-8") as dosya:
+                for satir in dosya:
+                    parcalar = satir.strip().split(",")
+                    if len(parcalar) == 2:
+                        mail = parcalar[0]
+                        oy_verilen = parcalar[1]
+                        
+                        # Eğer bu oy şampiyona verildiyse sayaca ekle
+                        if oy_verilen == sampiyon:
+                            if mail in fan_sayaci:
+                                fan_sayaci[mail] += 1 # Varsa 1 artır
+                            else:
+                                fan_sayaci[mail] = 1  # Yoksa 1 ile başlat
+
+            print(f"\n🏆 ŞAMPİYON: {sampiyon}")
+            
+            if fan_sayaci:
+                
+                en_sadik_fan = max(fan_sayaci, key=fan_sayaci.get)
+                atilan_oy_sayisi = fan_sayaci[en_sadik_fan]
+                
+                print(f"🎁 ÖDÜL KAZANAN TARAFTAR (En çok oy veren):")
+                print("-" * 50)
+                print(f"   👤 Mail Adresi : {en_sadik_fan}")
+                print(f"   🗳️  Attığı Oy   : {atilan_oy_sayisi} Adet")
+                print("-" * 50)
+            else:
+                print("   (Şampiyona henüz kimse oy vermemiş)")  
+
+            print("✅ Rapor terminale yazıldı. Dosya temizleniyor...\n")
+
+    if os.path.exists(OY_DOSYASI):
+        open(OY_DOSYASI, 'w').close()
+        
+    YARIS_BASLANGIC = datetime.now()
     return redirect(url_for('ana_sayfa'))
 
+@app.route('/api/guncel-veriler')
+def guncel_veriler_api():
+    siralama = siralamayi_hesapla()
+    podyum = siralama[:3]
+    sure = sure_hesapla()
+    return jsonify(siralama=siralama, podyum=podyum, sure=sure)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

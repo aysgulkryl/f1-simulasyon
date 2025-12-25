@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Hacettepe GP 2025</title>
     <style>
-        
         body { font-family: 'Segoe UI', sans-serif; background-color: #f1f1f1; margin: 0; padding-bottom: 50px; }
         
         /* Header*/
@@ -15,12 +14,11 @@
         .bayrak { font-size: 4em; } 
 
         /* YARIŞ BİTTİ EKRANI */
-        
         .sampiyon-konteyner {
             text-align: center;
             padding: 50px 20px;
             background: #15151e; 
-            min-height: 80vh; /* Ekranı kaplasın */
+            min-height: 80vh; 
         }
         
         .sampiyon-baslik {
@@ -37,7 +35,7 @@
 
         /* DEV PODYUM ALANI */
         .dev-podyum-alani {
-            width: 90%; max-width: 1400px; height: 600px; /* Çok daha büyük */
+            width: 90%; max-width: 1400px; height: 600px; 
             margin: 50px auto 0 auto;
             background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.1)), url('/static/arkaplan.jpeg');
             background-size: cover; background-position: center;
@@ -46,17 +44,14 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
         
-        /* Dev podyumdaki resimler ve isimler daha büyük */
-        .dev-podyum-alani .podyum-resim { width: 180px; height: 180px; border-width: 8px; }
+        .dev-podyum-alani .podyum-resim { width: 180px; height: 180px; border-width: 8px; border-style: solid; }
         .dev-podyum-alani .podyum-isim { font-size: 1.5em; padding: 10px 30px; }
         
-        /* Dev podyum pozisyonları (Daha yukarı aldık) */
         .dev-sira-1 { bottom: 220px; left: 50%; transform: translateX(-50%) scale(1.5); z-index: 3; }
         .dev-sira-2 { bottom: 120px; left: 20%; z-index: 2; transform: scale(1.2); }
         .dev-sira-3 { bottom: 80px; right: 20%; z-index: 1; transform: scale(1.1); }
 
-        /*  ARAYÜZ */
-        
+        /* ARAYÜZ */
         .kontrol-paneli-wrapper { background-color: #fff; padding: 20px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .arama-kutusu { display: flex; align-items: center; gap: 10px; }
         input[type="text"] { padding: 15px; width: 400px; border: 2px solid #ddd; border-radius: 30px; outline: none; font-size: 1.1em; background-color: #f9f9f9; transition: all 0.3s; }
@@ -129,20 +124,49 @@
             
             {% if siralama|length > 0 %}
                 <h1 class="sampiyon-isim-dev">{{ siralama[0].isim }}</h1>
+                <h3 style="color:#FFD700; margin-top:0; font-size: 2em; text-shadow: 0 0 10px black;">Toplam Oy: {{ siralama[0].puan }}</h3>
             {% else %}
                 <h1 class="sampiyon-isim-dev">SONUÇ YOK</h1>
             {% endif %}
 
             <div class="dev-podyum-alani">
                 {% for pilot in podyum %}
-                    <div class="podyum-basamak dev-sira-{{ loop.index }}">
-                        <img src="{{ pilot.resim }}" class="podyum-resim">
-                        <div class="podyum-isim">{{ pilot.isim }}</div>
-                        {% if loop.index == 1 %}
-                        <div style="color: #FFD700; font-size: 3em; margin-top: 10px;"></div>
-                        {% endif %}
-                    </div>
+                    
+                    {% if loop.index == 1 %}
+                        <div class="podyum-basamak dev-sira-1">
+                            <img src="{{ pilot.resim }}" class="podyum-resim" style="border-color: #FFD700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);">
+                            <div class="podyum-isim">{{ pilot.isim }}</div>
+                            <div style="background: #FFD700; color: #000; font-weight: bold; padding: 5px 15px; border-radius: 10px; margin-top: 10px; font-size: 1.2em;">
+                                {{ pilot.puan }} Oy
+                            </div>
+                        </div>
+                    {% elif loop.index == 2 %}
+                        <div class="podyum-basamak dev-sira-2">
+                            <img src="{{ pilot.resim }}" class="podyum-resim" style="border-color: #C0C0C0; box-shadow: 0 0 40px rgba(192, 192, 192, 0.6);">
+                            <div class="podyum-isim">{{ pilot.isim }}</div>
+                            <div style="background: #C0C0C0; color: #000; font-weight: bold; padding: 5px 15px; border-radius: 10px; margin-top: 10px; font-size: 1.2em;">
+                                {{ pilot.puan }} Oy
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="podyum-basamak dev-sira-3">
+                            <img src="{{ pilot.resim }}" class="podyum-resim" style="border-color: #CD7F32; box-shadow: 0 0 40px rgba(205, 127, 50, 0.6);">
+                            <div class="podyum-isim">{{ pilot.isim }}</div>
+                            <div style="background: #CD7F32; color: #000; font-weight: bold; padding: 5px 15px; border-radius: 10px; margin-top: 10px; font-size: 1.2em;">
+                                {{ pilot.puan }} Oy
+                            </div>
+                        </div>
+                    {% endif %}
+
                 {% endfor %}
+            </div>
+
+            <div style="margin-top: 50px;">
+                 <form action="/baslat" method="post">
+                    <button type="submit" class="btn-baslat" style="font-size: 1.5em; padding: 20px 40px; background-color: #28a745; cursor: pointer; box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);">
+                         🏁 YENİ YARIŞI BAŞLAT
+                    </button>
+                 </form>
             </div>
         </div>
 
@@ -150,7 +174,7 @@
 
         <div class="kontrol-paneli-wrapper">
             <form action="/" method="get" class="arama-kutusu">
-                <input type="text" name="q" placeholder="Pilot veya takım ara...">
+                <input type="text" name="q" placeholder="İsim, Takım, No (44) veya Ülke (Japonya)...">
                 <button type="submit" class="btn-ara">🔍 ARA</button>
             </form>
 
@@ -161,7 +185,7 @@
                         <button type="submit" class="btn-baslat">▶️ YARIŞI BAŞLAT</button>
                     </form>
                 {% else %}
-                    <span>⏳ KALAN SÜRE: {{ sure }}</span>
+                    <span>⏳ KALAN SÜRE: <span id="canli-sure">{{ sure }}</span></span>
                 {% endif %}
             </div>
         </div>
@@ -204,29 +228,31 @@
             <div class="sol-panel">
                 <h3 class="tablo-baslik">Canlı Oylama Sıralaması</h3>
                 <table>
-                    {% for p in siralama %}
-                    <tr>
-                        <td style="font-weight:bold; width: 40px; text-align:center; font-size:1.2em;">{{ loop.index }}.</td>
-                        <td>
-                            <div class="pilot-hucre">
-                                <img src="{{ p.resim }}" class="tablo-resim">
-                                <div>
-                                    <div class="pilot-isim-text">{{ p.isim }}</div>
-                                    <div class="pilot-takim-text">{{ p.takim }}</div>
+                    <tbody id="canli-tablo">
+                        {% for p in siralama %}
+                        <tr>
+                            <td style="font-weight:bold; width: 40px; text-align:center; font-size:1.2em;">{{ loop.index }}.</td>
+                            <td>
+                                <div class="pilot-hucre">
+                                    <img src="{{ p.resim }}" class="tablo-resim">
+                                    <div>
+                                        <div class="pilot-isim-text">{{ p.isim }}</div>
+                                        <div class="pilot-takim-text">{{ p.takim }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td style="text-align:right; font-weight:bold; color:#e10600; font-size:1.1em; padding-right:20px;">{{ p.puan }} Oy</td>
-                    </tr>
-                    {% endfor %}
-                    
-                    {% if siralama|length == 0 %}
-                    <tr><td colspan="3" style="text-align:center; padding:20px; color:#999;">Henüz oy kullanılmadı. İlk oyu sen ver!</td></tr>
-                    {% endif %}
+                            </td>
+                            <td style="text-align:right; font-weight:bold; color:#e10600; font-size:1.1em; padding-right:20px;">{{ p.puan }} Oy</td>
+                        </tr>
+                        {% endfor %}
+                        
+                        {% if siralama|length == 0 %}
+                        <tr><td colspan="3" style="text-align:center; padding:20px; color:#999;">Henüz oy kullanılmadı. İlk oyu sen ver!</td></tr>
+                        {% endif %}
+                    </tbody>
                 </table>
             </div>
 
-            <div class="sag-panel-podyum">
+            <div class="sag-panel-podyum" id="canli-podyum">
                 {% for pilot in podyum %}
                     <div class="podyum-basamak sira-{{ loop.index }}">
                         <img src="{{ pilot.resim }}" class="podyum-resim">
@@ -239,6 +265,77 @@
                 {% endif %}
             </div>
         </div>
+        
+    {% endif %}
+
+    <script>
+        function verileriGuncelle() {
+            // Sadece yarış devam ediyorsa verileri çek
+            fetch('/api/guncel-veriler')
+            .then(response => response.json())
+            .then(data => {
+                
+                // 1. SÜREYİ GÜNCELLE
+                const sureElementi = document.getElementById('canli-sure');
+                if (sureElementi) {
+                    // Eğer veriden "Bitti" geldiyse ve sayfada henüz "Bitti" yazmıyorsa
+                    // Sayfayı yenile ki Şampiyon Ekranı açılsın.
+                    if (data.sure.includes("Bitti") && !sureElementi.innerText.includes("Bitti")) {
+                         location.reload(); 
+                    }
+                    sureElementi.innerText = data.sure;
+                }
+
+                // 2. TABLOYU GÜNCELLE
+                const tablo = document.getElementById('canli-tablo');
+                if (tablo) {
+                    let tabloHTML = "";
+                    
+                    if (data.siralama.length === 0) {
+                        tabloHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#999;">Henüz oy kullanılmadı. İlk oyu sen ver!</td></tr>';
+                    } else {
+                        data.siralama.forEach((p, index) => {
+                            tabloHTML += `
+                            <tr>
+                                <td style="font-weight:bold; width: 40px; text-align:center; font-size:1.2em;">${index + 1}.</td>
+                                <td>
+                                    <div class="pilot-hucre">
+                                        <img src="${p.resim}" class="tablo-resim">
+                                        <div>
+                                            <div class="pilot-isim-text">${p.isim}</div>
+                                            <div class="pilot-takim-text">${p.takim}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align:right; font-weight:bold; color:#e10600; font-size:1.1em; padding-right:20px;">${p.puan} Oy</td>
+                            </tr>`;
+                        });
+                    }
+                    tablo.innerHTML = tabloHTML;
+                }
+
+                // 3. PODYUMU GÜNCELLE (Küçük Podyum)
+                const podyumAlani = document.getElementById('canli-podyum');
+                if (podyumAlani && data.podyum.length > 0) {
+                    let podyumHTML = "";
+                    data.podyum.forEach((p, index) => {
+                        let siraClass = "sira-" + (index + 1);
+                        podyumHTML += `
+                        <div class="podyum-basamak ${siraClass}">
+                            <img src="${p.resim}" class="podyum-resim">
+                            <div class="podyum-isim">${p.isim}</div>
+                        </div>`;
+                    });
+                    podyumAlani.innerHTML = podyumHTML;
+                }
+            })
+            .catch(err => console.error("Veri çekilemedi (Yarış bitmiş veya başlamamış olabilir):", err));
+        }
+
+        // Sayfa yüklendikten sonra her 1 saniyede bir verileri güncelle
+        setInterval(verileriGuncelle, 1000);
+
+    </script>
     
-    {% endif %} </body>
+</body>
 </html>
